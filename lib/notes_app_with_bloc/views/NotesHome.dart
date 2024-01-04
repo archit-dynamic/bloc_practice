@@ -21,6 +21,7 @@ class NotesHome extends StatelessWidget {
       create: (context) => AppBloc(
         loginApi: LoginApi(),
         notesApi: NotesApi(),
+        acceptedLoginHandle: const LoginHandle.archit(),
       ),
       child: Scaffold(
         appBar: AppBar(

@@ -2,7 +2,7 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:bloc/bloc.dart';
-import 'package:bloc_practice/notes_app_with_bloc/views/NotesHome.dart';
+import 'package:bloc_practice/multi_bloc_provider_app/views/multi_bloc_home.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -35,7 +35,8 @@ class MyApp extends StatelessWidget {
       //   create: (_) => ProductBloc(),
       //   child: const FirstBlocExampleHome(),
       // ),
-      home: const NotesHome(),
+      // home: const NotesHome(),
+      home: const MultiBlocHome(),
     );
   }
 }

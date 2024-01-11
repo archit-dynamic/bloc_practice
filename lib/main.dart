@@ -2,11 +2,24 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:bloc/bloc.dart';
-import 'package:bloc_practice/multi_bloc_provider_app/views/multi_bloc_home.dart';
+import 'package:bloc_practice/bloc_app_with_firebase/bloc/firebase_app_bloc.dart';
+import 'package:bloc_practice/bloc_app_with_firebase/bloc/firebase_app_event.dart';
+import 'package:bloc_practice/bloc_app_with_firebase/bloc/firebase_app_state.dart';
+import 'package:bloc_practice/bloc_app_with_firebase/views/firebase_login_view.dart';
+import 'package:bloc_practice/bloc_app_with_firebase/views/firebase_registration_view.dart';
+import 'package:bloc_practice/bloc_app_with_firebase/views/photo_gallery_view.dart';
+import 'package:bloc_practice/dialogs/loading_screen.dart';
+import 'package:bloc_practice/dialogs/show_auth_error.dart';
+import 'package:bloc_practice/firebase_options.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   HttpOverrides.global = MyHttpOverrides();
   runApp(const MyApp());
 }
@@ -26,17 +39,48 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
+    return BlocProvider<FirebaseAppBloc>(
+      create: (_) => FirebaseAppBloc()
+        ..add(
+          const AppEventInitialize(),
+        ),
+      child: MaterialApp(
+        title: 'Photo Library',
+        theme: ThemeData(
+          primarySwatch: Colors.blue,
+        ),
+        // home: BlocProvider(
+        //   create: (_) => ProductBloc(),
+        //   child: const FirstBlocExampleHome(),
+        // ),
+        // home: const NotesHome(),
+        // home: const MultiBlocHome(),
+        home: BlocConsumer<FirebaseAppBloc, FirebaseAppState>(
+          listener: (context, appState) {
+            if (appState.isLoading) {
+              LoadingScreen.instance()
+                  .show(context: context, text: "Loading...");
+            } else {
+              LoadingScreen.instance().hide();
+            }
+            final authError = appState.authError;
+            if (authError != null) {
+              showAuthError(context: context, authError: authError);
+            }
+          },
+          builder: (context, appState) {
+            if (appState is AppStateLoggedOut) {
+              return const FirebaseLoginView();
+            } else if (appState is AppStateLoggedIn) {
+              return const PhotoGalleryView();
+            } else if (appState is AppStateIsInRegistrationView) {
+              return const FirebaseRegistrationView();
+            } else {
+              return Container();
+            }
+          },
+        ),
       ),
-      // home: BlocProvider(
-      //   create: (_) => ProductBloc(),
-      //   child: const FirstBlocExampleHome(),
-      // ),
-      // home: const NotesHome(),
-      home: const MultiBlocHome(),
     );
   }
 }
